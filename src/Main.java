@@ -22,15 +22,21 @@ public class Main {
 		int nPiles = Integer.parseInt(tokens[0]);
 		int gameDepth = Integer.parseInt(tokens[1]);
 
-		String pile = input.readLine();
-		String firstPlayer = input.readLine();
-
-		GameOfBeans game = new GameOfBeans();
+		String[] pileInput = input.readLine().split(" ");
+		int[] pile = new int[nPiles];
 		
+		for (int i = 0; i < pileInput.length; i++) {
+			pile[i] = Integer.parseInt(pileInput[i]);
+		}
+		
+		String firstPlayerInput = input.readLine();
+		boolean firstPlayer = firstPlayerInput.equals("Jaba");
+
+		GameOfBeans game = new GameOfBeans(pile, gameDepth, firstPlayer);
+
 		int answer = game.computeScore();
 
 		System.out.println(answer);
 
 	}
-	
 }
