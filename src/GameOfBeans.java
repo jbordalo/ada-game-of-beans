@@ -47,6 +47,10 @@ public class GameOfBeans {
 		// If Pieton moves first we need to find his move
 		if (!firstPlayer) {
 			int[] pietonChoice = Pieton(0, pile.length - 1);
+			if (pietonChoice == null) {
+				return 0;
+			}
+
 			this.pile = Arrays.copyOfRange(pile, pietonChoice[0], pietonChoice[1] + 1);
 		}
 
