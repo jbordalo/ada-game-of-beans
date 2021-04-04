@@ -20,32 +20,33 @@ public class GameOfBeans {
 		return sum;
 	}
 
-	private int[] Pieton(int i, int f) {
+	private int[] Pieton(int i, int j) {
 		int max = Integer.MIN_VALUE;
 		int[] indexes = new int[2];
-		
+
 		// Left-side
-		for (int n = 0; n < this.gameDepth && i+n <= f; n++) {
-			int choice = score(i, i + n);
+		for (int d = 0; d < this.gameDepth && i+d <= j; d++) {
+			int choice = score(i, i + d);
 			if (choice > max) {
-				indexes[0] = i + n + 1;
-				indexes[1] = f;
+				indexes[0] = i + d + 1;
+				indexes[1] = j;
 				max = choice;
 			}
 		}
 
 		// Right-side
-		for (int n = 0; n < this.gameDepth && i+n <= f; n++) {
-			int choice = score(f - n, f);
+		for (int d = 0; d < this.gameDepth && i+d <= j; d++) {
+			int choice = score(j - d, j);
 			if (choice > max) {
 				indexes[0] = i;
-				indexes[1] = f - n - 1;
+				indexes[1] = j - d - 1;
 				max = choice;
 			}
 		}
 
 		if (indexes[1] - indexes[0] < 0)
 			return null;
+
 		return indexes;
 	}
 
@@ -62,35 +63,51 @@ public class GameOfBeans {
 		}
 
 		int[][] scores = new int[pile.length][pile.length];
-		// Fill first line with the pile values
+
+		// Fill first 'line' with the pile values
 		for (int i = 0; i < pile.length; i++) {
-			scores[0][i] = pile[i];
+			scores[i][i] = pile[i];
 		}
 
-		for (int f = 1; f < pile.length; f++) {
-			for (int i = 0; i < pile.length - f; i++) {
+		int max;
+		int score;
 
-				int max = Integer.MIN_VALUE;
-				// POSSIBLE MOVES
-				for (int n = 0; n < this.gameDepth && n <= f; n++) {
-					int posChoice = score(i, i + n);
-					int s = 0;
+		for (int difference = 1; difference < pile.length; difference++) {
+		    for (int i = 0; i < pile.length - difference; i++) {
+		        int j = i + difference;
 
-					int[] pietonPos = (f - n - 1 < 1) ? null : Pieton(i + n + 1, f + i);
-					s = (pietonPos == null) ? 0 : scores[pietonPos[1] - pietonPos[0]][pietonPos[0]];
+		        max = Integer.MIN_VALUE;
 
-					max = Math.max(max, posChoice + s);
-					int negChoice = score(f - n + i, f + i);
-					s = 0;
-					int[] pietonNeg = (f - n - 1 < 1) ? null : Pieton(i, f + i - n - 1);
-					s = (pietonNeg == null) ? 0 : scores[pietonNeg[1] - pietonNeg[0]][pietonNeg[0]];
+		        // Left-side
+				for (int d = 0; d < this.gameDepth && i+d <= j; d++) {
+					score = score(i, i + d);
 
-					max = Math.max(max, negChoice + s);
+					int[] pietonPos = null;
+					if (i+d != j) pietonPos = Pieton(i + d + 1, j);
+
+					score += (pietonPos == null) ? 0 : scores[pietonPos[0]][pietonPos[1]];
+
+					max = Math.max(max, score);
 				}
-				scores[f][i] = max;
-			}
+
+				// Right-side
+				for (int d = 0; d < this.gameDepth && i+d <= j; d++) {
+					score = score(j-d, j);
+
+					int[] pietonPos = null;
+					if (i != j-d) pietonPos = Pieton(i, j-d-1);
+
+					score += (pietonPos == null) ? 0 : scores[pietonPos[0]][pietonPos[1]];
+
+					max = Math.max(max, score);
+				}
+
+				scores[i][j] = max;
+
+		    }
 		}
 
-		return scores[pile.length - 1][0];
+		return scores[0][pile.length-1];
 	}
+
 }
