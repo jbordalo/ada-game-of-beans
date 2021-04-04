@@ -23,20 +23,27 @@ public class GameOfBeans {
 	private int[] Pieton(int i, int f) {
 		int max = Integer.MIN_VALUE;
 		int[] indexes = new int[2];
-		for (int n = 0; n < this.gameDepth && i + n <= f; n++) {
-			int posChoice = score(i, i + n);
-			if (posChoice > max) {
+		
+		// Left-side
+		for (int n = 0; n < this.gameDepth && i+n <= f; n++) {
+			int choice = score(i, i + n);
+			if (choice > max) {
 				indexes[0] = i + n + 1;
 				indexes[1] = f;
-				max = posChoice;
-			}
-			int negChoice = score(f - n, f);
-			if (negChoice > max) {
-				indexes[0] = i;
-				indexes[1] = f - n - 1;
-				max = negChoice;
+				max = choice;
 			}
 		}
+
+		// Right-side
+		for (int n = 0; n < this.gameDepth && i+n <= f; n++) {
+			int choice = score(f - n, f);
+			if (choice > max) {
+				indexes[0] = i;
+				indexes[1] = f - n - 1;
+				max = choice;
+			}
+		}
+
 		if (indexes[1] - indexes[0] < 0)
 			return null;
 		return indexes;
@@ -50,7 +57,7 @@ public class GameOfBeans {
 			if (pietonChoice == null) {
 				return 0;
 			}
-
+			// TODO
 			this.pile = Arrays.copyOfRange(pile, pietonChoice[0], pietonChoice[1] + 1);
 		}
 
