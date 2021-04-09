@@ -106,8 +106,6 @@ public class GameOfBeans {
 
     public int computeScore() {
 
-//        long init = System.nanoTime();
-
         // If Pieton moves first we need to find his move
         if (!firstPlayer) {
             int[] pietonChoice = Pieton(0, pile.length - 1);
@@ -166,10 +164,6 @@ public class GameOfBeans {
 
             }
         }
-
-//        long end = System.nanoTime();
-//
-//        System.out.printf("Time:%f", (double) (end-init) / 1000000000);
 
         return scores[0][pile.length - 1];
     }
