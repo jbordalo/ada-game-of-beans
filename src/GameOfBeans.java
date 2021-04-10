@@ -25,35 +25,6 @@ public class GameOfBeans {
         return sum;
     }
 
-    private int[] Pieton(int i, int j) {
-        int max = Integer.MIN_VALUE;
-        int[] indexes = new int[2];
-
-        // Left-side
-        for (int d = 0; d < this.gameDepth && i + d <= j; d++) {
-            int choice = score(i, i + d);
-            if (choice > max) {
-                indexes[0] = i + d + 1;
-                indexes[1] = j;
-                max = choice;
-            }
-        }
-
-        // Right-side
-        for (int d = 0; d < this.gameDepth && i + d <= j; d++) {
-            int choice = score(j - d, j);
-            if (choice > max) {
-                indexes[0] = i;
-                indexes[1] = j - d - 1;
-                max = choice;
-            }
-        }
-
-        if (indexes[1] - indexes[0] < 0)
-            return null;
-
-        return indexes;
-    }
 
 
     private void populatePieton(int[][] pieton) {
@@ -61,7 +32,7 @@ public class GameOfBeans {
             int max;
             int index;
             for (int i = 0; i < pile.length; i++) {
-                    // Left-side
+                // Left-side
                 max = Integer.MIN_VALUE;
                 index = 0;
                 for (int d = 0; d < this.gameDepth && (i+d < pile.length); d++) {
@@ -73,7 +44,7 @@ public class GameOfBeans {
                 }
                 pieton[i][LEFT] = i+index;
                 pieton[i][LEFT_MAX] = max;
-
+                // Right-side
                 max = Integer.MIN_VALUE;
                 for (int d = 0; d < this.gameDepth && !(i-d<0); d++) {
                     int choice = score(i - d, i);
@@ -106,22 +77,22 @@ public class GameOfBeans {
 
     public int computeScore() {
 
-        // If Pieton moves first we need to find his move
-        if (!firstPlayer) {
-            int[] pietonChoice = Pieton(0, pile.length - 1);
-            if (pietonChoice == null) {
-                return 0;
-            }
-            // TODO
-            this.pile = Arrays.copyOfRange(pile, pietonChoice[0], pietonChoice[1] + 1);
-        }
-
         int[][] scores = new int[pile.length][pile.length];
 
         int[][] pieton = new int[pile.length][4];
 
         // Populate Pieton's matrix
         populatePieton(pieton);
+
+        // If Pieton moves first we need to find his move
+        if(!firstPlayer) {
+            int[] pietonChoice = pietonChoice(0, pile.length - 1, pieton);
+            if (pietonChoice == null) {
+                return 0;
+            }
+            // TODO
+            this.pile = Arrays.copyOfRange(pile, pietonChoice[0], pietonChoice[1] + 1);
+        }
 
         // Fill first 'line' with the pile values
         for (int i = 0; i < pile.length; i++) {
