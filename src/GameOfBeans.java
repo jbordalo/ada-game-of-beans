@@ -2,14 +2,9 @@ import java.util.Arrays;
 
 public class GameOfBeans {
 
-    private final int LEFT = 0;
-    private final int LEFT_MAX = 1;
-    private final int RIGHT = 2;
-    private final int RIGHT_MAX = 3;
-
     private int[] pile;
-    private int gameDepth;
-    private boolean firstPlayer;
+    private final int gameDepth;
+    private final boolean firstPlayer;
 
     public GameOfBeans(int[] pile, int gameDepth, boolean firstPlayer) {
         this.pile = pile;
@@ -20,100 +15,111 @@ public class GameOfBeans {
     private int score(int i, int j) {
         int sum = 0;
         for (int k = i; k <= j; k++) {
-            sum += pile[k];
+            sum += this.pile[k];
         }
         return sum;
     }
 
+    private int[] Pieton(int i, int j) {
+        int max = Integer.MIN_VALUE;
+        int[] indices = new int[2];
 
-
-    private void populatePieton(int[][] pieton) {
-
-            int max;
-            int index;
-            for (int i = 0; i < pile.length; i++) {
-                // Left-side
-                max = Integer.MIN_VALUE;
-                index = 0;
-                for (int d = 0; d < this.gameDepth && (i+d < pile.length); d++) {
-                    int choice = score(i, i + d);
-                    if (choice > max) {
-                        max = choice;
-                        index = d;
-                    }
-                }
-                pieton[i][LEFT] = i+index;
-                pieton[i][LEFT_MAX] = max;
-                // Right-side
-                max = Integer.MIN_VALUE;
-                for (int d = 0; d < this.gameDepth && !(i-d<0); d++) {
-                    int choice = score(i - d, i);
-                    if (choice > max) {
-                        max = choice;
-                        index = d;
-                    }
-                }
-                pieton[i][RIGHT] = i-index;
-                pieton[i][RIGHT_MAX] = max;
-
+        // Left-side
+        for (int d = 0; d < this.gameDepth && i + d <= j; d++) {
+            int choice = this.score(i, i + d);
+            if (choice > max) {
+                indices[0] = i;
+                indices[1] = i + d;
+                max = choice;
             }
+        }
+
+        // Right-side
+        for (int d = 0; d < this.gameDepth && i + d <= j; d++) {
+            int choice = this.score(j - d, j);
+            if (choice > max) {
+                indices[0] = j - d;
+                indices[1] = j;
+                max = choice;
+            }
+        }
+
+//        assert(indices[1]-indices[0] >= 0);
+//        if (indices[1] - indices[0] < 0)
+//            return null;
+
+        return indices;
     }
 
-    private int[] pietonChoice(int left_bound, int right_bound, int[][] pieton) {
+    private void populatePieton(int[][][] pieton) {
+        for (int i = 0; i < this.pile.length; i++) {
+            for (int j = i; j < this.pile.length; j++) {
+                pieton[i][j] = this.Pieton(i, j);
+            }
+        }
+    }
 
-        int left_value = pieton[left_bound][LEFT_MAX];
-        int right_value = pieton[right_bound][RIGHT_MAX];
+    private int[] computeRemainingPile(int left_bound, int right_bound, int[][][] pieton) {
 
-        if (left_value >= right_value) {
-            int index = pieton[left_bound][LEFT];
-            if (index + 1 > right_bound) return null;
-            return new int[]{index+1, right_bound};
-        } else {
-            int index = pieton[right_bound][RIGHT];
-            if (left_bound > index-1) return null;
-            return new int[]{left_bound, index - 1};
+        int[] indices = pieton[left_bound][right_bound];
+
+        // Pieton chose from the left
+        if (left_bound == indices[0]) {
+            if (indices[1] + 1 > right_bound) return null;
+            return new int[]{indices[1] + 1, right_bound};
+        }
+        // Pieton chose from the right
+        else {
+            if (left_bound > indices[0] - 1) return null;
+            return new int[]{left_bound, indices[0] - 1};
         }
     }
 
     public int computeScore() {
 
-        int[][] scores = new int[pile.length][pile.length];
+        int[][] scores = new int[this.pile.length][this.pile.length];
 
-        int[][] pieton = new int[pile.length][4];
-
-        // Populate Pieton's matrix
-        populatePieton(pieton);
+        int[][][] pieton = new int[this.pile.length][this.pile.length][2];
 
         // If Pieton moves first we need to find his move
-        if(!firstPlayer) {
-            int[] pietonChoice = pietonChoice(0, pile.length - 1, pieton);
-            if (pietonChoice == null) {
+        if (!this.firstPlayer) {
+            int[] pietonChoice = this.Pieton(0, pile.length - 1);
+
+            if (pietonChoice[0] == 0) {
+                this.pile = Arrays.copyOfRange(this.pile, pietonChoice[1] + 1, this.pile.length);
+            } else {
+                this.pile = Arrays.copyOfRange(this.pile, 0, pietonChoice[0]);
+            }
+
+            if (this.pile.length == 0) {
                 return 0;
             }
-            // TODO
-            this.pile = Arrays.copyOfRange(pile, pietonChoice[0], pietonChoice[1] + 1);
         }
 
+        // Populate Pieton's matrix
+        this.populatePieton(pieton);
+
         // Fill first 'line' with the pile values
-        for (int i = 0; i < pile.length; i++) {
-            scores[i][i] = pile[i];
+        for (int i = 0; i < this.pile.length; i++) {
+            scores[i][i] = this.pile[i];
         }
 
         int max;
         int score;
 
-        for (int difference = 1; difference < pile.length; difference++) {
-            for (int i = 0; i < pile.length - difference; i++) {
+        for (int difference = 1; difference < this.pile.length; difference++) {
+            for (int i = 0; i < this.pile.length - difference; i++) {
                 int j = i + difference;
 
                 max = Integer.MIN_VALUE;
 
                 // Left-side
                 for (int d = 0; d < this.gameDepth && i + d <= j; d++) {
-                    score = score(i, i + d);
+                    score = this.score(i, i + d);
 
                     int[] pietonPos = null;
-                    if (i + d != j) pietonPos = pietonChoice(i + d + 1, j, pieton);
+                    // TODO
+                    if (i + d != j) pietonPos = this.computeRemainingPile(i + d + 1, j, pieton);
                     score += (pietonPos == null) ? 0 : scores[pietonPos[0]][pietonPos[1]];
 
                     max = Math.max(max, score);
@@ -124,7 +130,7 @@ public class GameOfBeans {
                     score = score(j - d, j);
 
                     int[] pietonPos = null;
-                    if (i != j - d) pietonPos = pietonChoice(i, j - d - 1, pieton);
+                    if (i != j - d) pietonPos = this.computeRemainingPile(i, j - d - 1, pieton);
 
                     score += (pietonPos == null) ? 0 : scores[pietonPos[0]][pietonPos[1]];
 
@@ -136,6 +142,6 @@ public class GameOfBeans {
             }
         }
 
-        return scores[0][pile.length - 1];
+        return scores[0][this.pile.length - 1];
     }
 }

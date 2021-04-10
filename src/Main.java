@@ -9,16 +9,16 @@ public class Main {
 
         int testCases = Integer.parseInt(input.readLine());
 
-        long time = 0;
+//        long time = 0;
 
         for (int i = 0; i < testCases; i++) {
-            long init = System.nanoTime();
+//            long init = System.nanoTime();
             solveTestCase(input);
-            long end = System.nanoTime();
-            time += (end-init);
+//            long end = System.nanoTime();
+//            time += (end-init);
         }
 
-        System.out.printf("Time:%f", (double) time / testCases / 1000000);
+//        System.out.printf("Time:%f", (double) time / testCases / 1000000);
         input.close();
     }
 
