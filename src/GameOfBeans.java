@@ -6,17 +6,22 @@ public class GameOfBeans {
     private final int gameDepth;
     private final boolean firstPlayer;
     private int[][] scores;
+    private int BEGIN;
+    private int END;
 
     public GameOfBeans(int[] pile, int gameDepth, boolean firstPlayer) {
         this.pile = pile;
         this.gameDepth = gameDepth;
         this.firstPlayer = firstPlayer;
         this.scores = new int[this.pile.length][this.pile.length];
+        this.BEGIN = 0;
+        this.END = this.pile.length;
         populateScores();
     }
 
     private int score(int i, int j) {
 //        System.out.println(i + " " + j);
+
         int sum = 0;
         for (int k = i; k <= j; k++) {
             sum += this.pile[k];
@@ -54,8 +59,8 @@ public class GameOfBeans {
     }
 
     private void populatePieton(int[][][] pieton) {
-        for (int i = 0; i < this.pile.length; i++) {
-            for (int j = i; j < this.pile.length; j++) {
+        for (int i = 0; i < this.END; i++) {
+            for (int j = i; j < this.END; j++) {
                 pieton[i][j] = this.Pieton(i, j);
             }
         }
@@ -78,8 +83,9 @@ public class GameOfBeans {
     }
 
     private void populateScores() {
-        for (int i = 0; i < this.pile.length; i++) {
-            for (int j = i; j < this.pile.length; j++) {
+        //TODO
+        for (int i = this.BEGIN; i < this.END; i++) {
+            for (int j = i; j < this.END; j++) {
                 this.scores[i][j] = this.score(i, j);
             }
         }
@@ -90,39 +96,39 @@ public class GameOfBeans {
         int[][][] pieton = new int[this.pile.length][this.pile.length][2];
         int[][] jaba = new int[this.pile.length][this.pile.length];
 
+        // Populate Pieton's matrix
+        this.populatePieton(pieton);
 
-
-        // If Pieton moves first we need to find his move
+        //TODO If Pieton moves first we need to find his move
         if (!this.firstPlayer) {
             int[] pietonChoice = this.Pieton(0, this.pile.length - 1);
 
             if (pietonChoice[0] == 0) {
-                this.pile = Arrays.copyOfRange(this.pile, pietonChoice[1] + 1, this.pile.length);
+                this.BEGIN = pietonChoice[1]+1;
+                // this.pile = Arrays.copyOfRange(this.pile, pietonChoice[1] + 1, this.pile.length);
             } else {
-              this.pile = Arrays.copyOfRange(this.pile, 0, pietonChoice[0]);
+                this.END = pietonChoice[0];
+                // this.pile = Arrays.copyOfRange(this.pile, 0, pietonChoice[0]);
 
             }
 
-            if (this.pile.length == 0) {
+            if (this.BEGIN >= this.END) {
                 return 0;
             }
         }
 
-        populateScores();
-
-        // Populate Pieton's matrix
-        this.populatePieton(pieton);
+        //TODO populateScores();
 
         // Fill first 'line' with the pile values
-        for (int i = 0; i < this.pile.length; i++) {
+        for (int i = this.BEGIN; i < this.END; i++) {
             jaba[i][i] = this.pile[i];
         }
 
         int max;
         int score;
 
-        for (int difference = 1; difference < this.pile.length; difference++) {
-            for (int i = 0; i < this.pile.length - difference; i++) {
+        for (int difference = 1; difference < this.END; difference++) {
+            for (int i = this.BEGIN; i < this.END - difference; i++) {
                 int j = i + difference;
 
                 max = Integer.MIN_VALUE;
@@ -154,10 +160,9 @@ public class GameOfBeans {
                 }
 
                 jaba[i][j] = max;
-
             }
         }
 
-        return jaba[0][this.pile.length - 1];
+        return jaba[this.BEGIN][this.END - 1];
     }
 }
