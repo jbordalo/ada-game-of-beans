@@ -9,21 +9,14 @@ public class Main {
 
         int testCases = Integer.parseInt(input.readLine());
 
-//        long time = 0;
-
         for (int i = 0; i < testCases; i++) {
-//            long init = System.nanoTime();
             solveTestCase(input);
-//            long end = System.nanoTime();
-//            time += (end-init);
         }
 
-//        System.out.printf("Time:%f", (double) time / testCases / 1000000);
         input.close();
     }
 
     public static void solveTestCase(BufferedReader input) throws IOException {
-
         String[] tokens = input.readLine().split(" ");
         int nPiles = Integer.parseInt(tokens[0]);
         int gameDepth = Integer.parseInt(tokens[1]);
@@ -35,14 +28,10 @@ public class Main {
             pile[i] = Integer.parseInt(pileInput[i]);
         }
 
-        String firstPlayerInput = input.readLine();
-        boolean firstPlayer = firstPlayerInput.equals("Jaba");
+        String firstPlayer = input.readLine();
 
         GameOfBeans game = new GameOfBeans(pile, gameDepth, firstPlayer);
 
-        int answer = game.computeScore();
-
-        System.out.println(answer);
-
+        System.out.println(game.computeScore());
     }
 }
